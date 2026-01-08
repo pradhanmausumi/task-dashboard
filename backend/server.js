@@ -140,10 +140,11 @@ async function deleteTask(id) {
   return result.deletedCount > 0;
 }
 
-// Routes
+// API Router with /api prefix
+const apiRouter = express.Router();
 
-// GET /tasks - Get all tasks
-app.get('/tasks', async (req, res) => {
+// GET /api/tasks - Get all tasks
+apiRouter.get('/tasks', async (req, res) => {
   try {
     const tasks = await getTasks();
     res.json(tasks);
@@ -152,8 +153,8 @@ app.get('/tasks', async (req, res) => {
   }
 });
 
-// GET /tasks/:id - Get single task
-app.get('/tasks/:id', async (req, res) => {
+// GET /api/tasks/:id - Get single task
+apiRouter.get('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -171,8 +172,8 @@ app.get('/tasks/:id', async (req, res) => {
   }
 });
 
-// POST /tasks - Create new task
-app.post('/tasks', async (req, res) => {
+// POST /api/tasks - Create new task
+apiRouter.post('/tasks', async (req, res) => {
   try {
     const { title, description, status, dueDate } = req.body;
     
@@ -195,8 +196,8 @@ app.post('/tasks', async (req, res) => {
   }
 });
 
-// PUT /tasks/:id - Update task
-app.put('/tasks/:id', async (req, res) => {
+// PUT /api/tasks/:id - Update task
+apiRouter.put('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, status, dueDate } = req.body;
@@ -218,8 +219,8 @@ app.put('/tasks/:id', async (req, res) => {
   }
 });
 
-// DELETE /tasks/:id - Delete task
-app.delete('/tasks/:id', async (req, res) => {
+// DELETE /api/tasks/:id - Delete task
+apiRouter.delete('/tasks/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await deleteTask(id);
@@ -235,7 +236,7 @@ app.delete('/tasks/:id', async (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+apiRouter.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     storage: useInMemory ? 'in-memory' : 'mongodb',
@@ -243,12 +244,16 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Mount API router with /api prefix
+app.use('/api', apiRouter);
+
 // Start server
 async function startServer() {
   await connectToDatabase();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📊 Storage mode: ${useInMemory ? 'In-Memory' : 'MongoDB'}`);
+    console.log(`🔗 API available at: http://localhost:${PORT}/api/tasks`);
   });
 }
 
